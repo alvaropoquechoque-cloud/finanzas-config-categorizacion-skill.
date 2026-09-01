@@ -1,0 +1,8 @@
+interface:
+  display_name: "Finanzas Sommos — Config y Categorización"
+  short_description: "Mantiene catálogos y reglas automáticas de categorización del workflow financiero de Sommos."
+  brand_color: "#4D0B95"
+  default_prompt: "Usa $finanzas-config-categorizacion para revisar o modificar Config y Reglas de categorización sin romper validaciones ni categorías existentes."
+
+policy:
+  allow_implicit_invocation: true
