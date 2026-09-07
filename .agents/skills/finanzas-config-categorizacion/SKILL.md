@@ -1,17 +1,22 @@
 ---
 name: finanzas-config-categorizacion
-description: Mantiene los catálogos, validaciones y reglas automáticas de categorización del workflow financiero de Sommos.
+description: Mantiene los catálogos, validaciones y reglas automáticas de categorización del modelo financiero de Sommos.
 ---
 
 # Finanzas Sommos — Config y Categorización
 
-## Propósito
+## Objetivo
 
-Administrar la configuración maestra y las reglas automáticas de categorización del modelo financiero de Sommos.
+Mantener consistente la estructura maestra del modelo financiero de Sommos antes de registrar, importar o analizar movimientos.
 
-Esta skill define cómo se clasifican las transacciones, pero no registra movimientos bancarios, no concilia bancos y no calcula el tipo de cambio.
+Esta skill es responsable de:
 
-## Fuente principal
+- `Config`
+- `Reglas categorización`
+
+Puede consultar `Transacciones` para validar el efecto de las reglas, pero no es responsable de registrar movimientos bancarios, CxC, CxP, presupuesto, conciliación o runway.
+
+## Fuente de verdad
 
 Google Sheet:
 
@@ -19,213 +24,258 @@ Google Sheet:
 - Spreadsheet ID: `1RXy19WZMPQePflFaFeIIHnh09BpJbwOnk6Wumw8bW4E`
 - URL: `https://docs.google.com/spreadsheets/d/1RXy19WZMPQePflFaFeIIHnh09BpJbwOnk6Wumw8bW4E/edit`
 
-Pestañas principales de esta skill:
+El Google Sheet vivo siempre prevalece sobre snapshots, ejemplos o documentación guardada en GitHub.
 
-- `Config`
-- `Reglas categorización`
+Antes de modificar algo, leer en vivo las pestañas y rangos afectados.
 
-Puede consultar `Transacciones` para validar cómo se está aplicando una regla.
+## Cuándo usar esta skill
 
-## Principio de fuente viva
+Usar esta skill cuando sea necesario:
 
-El Google Sheet es la fuente de verdad.
+- crear o modificar una categoría;
+- añadir un país;
+- añadir una moneda;
+- añadir una cuenta o medio bancario;
+- modificar tipos de transacción;
+- modificar estados de pago;
+- crear, activar, desactivar o corregir reglas de categorización;
+- investigar por qué una transacción quedó mal categorizada;
+- revisar movimientos `Por categorizar`;
+- validar que una categoría utilizada en `Transacciones` exista en `Config`.
 
-Los archivos dentro de `references/` documentan la lógica conocida, pero si existe una diferencia entre una referencia de GitHub y el Sheet actual, prevalece el Sheet.
+## Catálogos actuales
 
-Antes de modificar categorías o reglas, leer siempre la configuración vigente.
+Los catálogos deben leerse siempre desde `Config`.
 
-## Config
+Valores conocidos actualmente incluyen:
 
-`Config` contiene las listas maestras utilizadas por el workflow financiero.
+### Países
 
-Entre ellas:
+- BOLIVIA
+- USA
+- PERU
+- CHILE
+- GUATEMALA
 
-- países;
-- monedas;
-- tipos de transacción;
-- áreas;
-- categorías;
-- estados de conciliación;
-- valores Sí/No;
-- proyectos/clientes;
-- estados de CxC;
-- estados de CxP;
-- estados de presupuesto;
-- estados de pago;
-- cuentas y medios.
+### Monedas
 
-No agregar un valor a una transacción si ese valor requiere validación y todavía no existe en `Config`.
+- BOB
+- USD
+- SOL
+- CLP
 
-Cuando sea necesario crear una nueva categoría, cuenta, país, moneda o estado:
-
-1. verificar que no exista ya;
-2. confirmar que el nuevo valor sea realmente necesario;
-3. agregarlo primero al catálogo correspondiente;
-4. recién después utilizarlo en las demás pestañas.
-
-## Tipos de transacción
-
-Los tipos vigentes conocidos son:
+### Tipos de transacción
 
 - `Ingreso`
 - `Egreso`
 - `Transferencia interna`
 
-No convertir una transferencia interna en ingreso o egreso únicamente para hacer cuadrar una conciliación.
+`Transferencia interna` es el nombre canónico actual.
+
+No crear variantes como `Transferencia`, `Transfer`, `Traspaso` u otras sin modificar primero el modelo de manera controlada.
+
+### Bancos / medios conocidos
+
+- Banco Sol
+- Brex
+- Brex Card
+- Meru
+- Scotiabank
+- BCI
+
+Siempre validar la lista viva antes de añadir otro valor.
+
+## Categorías
+
+Las categorías válidas se administran en `Config`.
+
+Entre las categorías actualmente utilizadas se encuentran:
+
+- Outsourced services
+- RH expenses
+- Administrative expenses
+- Sales expenses
+- Travel
+- Product expenses
+- Softwares for development
+- Innovatech
+- Platform cost
+- Bank fees
+- Exchange rate differences
+- Financial expense
+- Taxes
+- Startup Chile
+- Marketing services
+- Contingency
+- Full new integration incomes
+- Extra features development income
+- Proof of concept incomes
+- IT salaries
+- Sales salaries
+- Finance salaries
+- Operative salaries
+- RH salaries
+- Transferencias internas
+- Bank interest earned
+- Other financing cash flow
+- Shareholder loan received (non-interest)
+- Shareholder loan repayment (non-interest)
+- Ingresos extraordinarios
+- Por categorizar
+
+No asumir que esta lista es permanente.
+
+Antes de asignar o crear una categoría, revisar `Config`.
 
 ## Reglas de categorización
 
-La pestaña `Reglas categorización` utiliza principalmente:
+La pestaña `Reglas categorización` contiene:
 
-- Palabra / frase
+- Palabra/frase
 - Tipo
 - Categoría
 - Activa
 - Responsable opcional
 - Moneda opcional
 
-La primera coincidencia activa válida es la que debe utilizar `Transacciones`.
+Las reglas se evalúan en orden.
 
-Por lo tanto, el orden de las reglas importa.
+La primera regla activa que cumple las condiciones es la que debe prevalecer.
 
-Antes de insertar una nueva regla:
+## Procedimiento para crear o modificar una regla
 
-1. buscar reglas existentes con palabras equivalentes o similares;
-2. revisar si una regla más general podría capturar el movimiento antes;
-3. validar que la categoría exista en `Config`;
-4. evitar duplicados;
-5. colocar la regla en una posición coherente con su nivel de especificidad.
+1. Leer `Config`.
+2. Leer `Reglas categorización`.
+3. Confirmar que la categoría destino existe.
+4. Buscar reglas similares o duplicadas.
+5. Revisar si una regla anterior podría capturar el movimiento antes.
+6. Usar la descripción o patrón más específico posible.
+7. Aplicar `Tipo` cuando ayude a evitar falsos positivos.
+8. Usar Responsable o Moneda solo cuando realmente sean necesarios.
+9. Mantener `Activa = Sí` únicamente para reglas vigentes.
+10. Probar la regla sobre transacciones existentes relacionadas.
+11. Confirmar que no cambió accidentalmente la categorización de otros movimientos.
 
-## Coincidencias opcionales
+## Principio de especificidad
 
-Una regla puede restringirse adicionalmente por:
+Preferir reglas específicas sobre reglas demasiado generales.
 
-- Responsable
-- Moneda
+Ejemplo:
 
-Esto permite diferenciar movimientos con descripciones similares.
+Una regla para `Banco Sol` + `Ingreso` puede ser válida para ingresos comerciales específicos, pero una regla genérica únicamente basada en la palabra `Banco` sería demasiado amplia.
 
-Ejemplo documentado:
-
-`Hugo Christian`
-
-puede clasificarse de forma diferente dependiendo de si el movimiento está en BOB o USD.
-
-No eliminar estas restricciones al simplificar reglas.
+No crear reglas que puedan capturar cargos bancarios, transferencias u otros conceptos no relacionados.
 
 ## Transferencias internas
 
-Los movimientos de tipo `Transferencia interna` deben clasificarse como:
+Para movimientos entre cuentas propias:
 
-`Transferencias internas`
+- Tipo = `Transferencia interna`
+- Categoría = `Transferencias internas`
 
-Ejemplos conocidos:
+La transferencia debe conservar además:
 
-- movimientos entre cuentas propias;
-- pagos de tarjeta desde otra cuenta propia;
-- `Brex Card Payment`;
-- transferencias internas identificadas durante conciliación.
+- Cuenta origen
+- Cuenta destino
 
-Una transferencia interna:
+Las transferencias internas:
 
-- no es ingreso operativo;
-- no es gasto operativo;
-- no debe aumentar ingresos;
-- no debe aumentar burn;
-- debe conservar cuenta origen y cuenta destino cuando se conozcan.
+- no son ingreso operativo;
+- no son gasto operativo;
+- no forman parte del burn;
+- no deben alterar el resultado financiero;
+- sí deben afectar la conciliación de las cuentas origen y destino correspondientes.
+
+## Categoría desconocida
+
+Si no existe información suficiente para clasificar un movimiento:
+
+`Por categorizar`
+
+Nunca inventar silenciosamente una categoría.
+
+Si el usuario posteriormente confirma la naturaleza del movimiento:
+
+1. crear o ajustar la regla correspondiente si es reutilizable;
+2. recategorizar el movimiento;
+3. comprobar si existen otros movimientos similares;
+4. verificar que no queden registros equivalentes como `Por categorizar`.
 
 ## Grants y financiamiento
 
-Ingresos asociados a grants conocidos como:
+No clasificar automáticamente un grant como ingreso operativo ordinario.
+
+Los grants pueden utilizar:
+
+`Other financing cash flow`
+
+según la naturaleza registrada en el modelo.
+
+Ejemplos conocidos:
 
 - INNOVATECH
 - Startup Perú
 - INCOFIN
 - FIID Guatemala
 
-se clasifican como:
+El monto total aprobado de un grant no equivale automáticamente a una cuenta por cobrar ni a ingreso realizado.
 
-`Other financing cash flow`
+La categorización únicamente define la naturaleza del movimiento; el reconocimiento de CxC y caja pertenece a otras skills.
 
-No deben clasificarse automáticamente como ingreso operativo ordinario.
+## Sueldos
 
-## Préstamos de accionistas
+Las categorías salariales deben conservar la separación funcional existente:
 
-Los préstamos recibidos de accionistas se clasifican como:
+- IT salaries
+- Sales salaries
+- Finance salaries
+- Operative salaries
+- RH salaries
 
-`Shareholder loan received (non-interest)`
+No consolidarlas en una única categoría `Salaries` dentro de `Transacciones` salvo que el modelo sea modificado explícitamente.
 
-Las devoluciones de principal se clasifican como:
+Las vistas de presupuesto pueden agruparlas posteriormente para reporting.
 
-`Shareholder loan repayment (non-interest)`
+## Cambios en Config
 
-El principal de un préstamo no debe confundirse con ingreso operativo ni con gasto operativo.
+Antes de añadir un nuevo valor a un catálogo:
 
-## Ingresos extraordinarios
+1. comprobar que no exista con otro nombre;
+2. evitar duplicados por mayúsculas, espacios o variantes;
+3. revisar validaciones dependientes;
+4. revisar fórmulas que comparen textos exactos;
+5. comprobar reglas de categorización relacionadas.
 
-Los ingresos identificados explícitamente como extraordinarios pueden utilizar:
+No renombrar valores existentes sin investigar primero sus dependencias.
 
-`Ingresos extraordinarios`
+## Validaciones posteriores
 
-No utilizar esta categoría como fallback genérico.
+Después de cualquier cambio:
 
-## Fallback de categorización
+1. volver a leer las filas modificadas;
+2. comprobar que las validaciones sigan funcionando;
+3. revisar transacciones relacionadas;
+4. buscar `Por categorizar` inesperados;
+5. buscar errores `#REF!`, `#VALUE!`, `#N/A` o `#ERROR!`;
+6. confirmar que no se generaron categorías o reglas duplicadas.
 
-Si ninguna regla válida coincide, utilizar:
+## Límites de esta skill
 
-`Por categorizar`
+Esta skill no debe:
 
-Nunca inventar silenciosamente una categoría para evitar `Por categorizar`.
+- importar extractos bancarios;
+- registrar movimientos en `Transacciones`;
+- modificar tipos de cambio;
+- conciliar bancos;
+- crear CxC o CxP;
+- modificar presupuesto;
+- calcular runway;
+- modificar directamente KPIs del Dashboard.
 
-Si existe suficiente información para definir una nueva regla:
+Cuando una solicitud pertenezca a esos procesos, usar la skill financiera correspondiente.
 
-1. proponer o crear la regla;
-2. validar su categoría;
-3. comprobar posibles conflictos;
-4. volver a revisar las transacciones afectadas.
+## Principio final
 
-## Modificación de reglas existentes
+Configurar primero, registrar después.
 
-Cambiar una regla puede afectar transacciones futuras y también la interpretación de movimientos existentes.
-
-Antes de editar una regla existente:
-
-- identificar qué descripciones puede capturar;
-- revisar si existen movimientos históricos relacionados;
-- evitar reclasificaciones masivas no solicitadas;
-- confirmar especialmente cambios entre ingresos, gastos, transferencias, financiamiento y salarios.
-
-No modificar categorías históricas ya revisadas por el usuario únicamente porque una regla automática nueva produciría otro resultado.
-
-## Flujo recomendado
-
-Al recibir una descripción nueva o detectar una transacción sin clasificación:
-
-1. leer `Config`;
-2. leer las reglas activas relevantes;
-3. comprobar si ya existe una coincidencia;
-4. revisar Tipo, Responsable y Moneda;
-5. validar la categoría;
-6. crear o ajustar la regla únicamente si es necesario;
-7. comprobar el resultado en `Transacciones`;
-8. buscar conflictos o movimientos inesperadamente afectados.
-
-## Reglas de seguridad
-
-- No asumir posiciones históricas de columnas; leer encabezados actuales.
-- No crear categorías duplicadas.
-- No inventar países, monedas, responsables o cuentas.
-- No cambiar `Ingreso`, `Egreso` y `Transferencia interna` sin evidencia.
-- No utilizar una categoría de financiamiento como ingreso operativo.
-- No utilizar transferencias internas como gasto o ingreso.
-- No reclasificar movimientos históricos revisados sin una razón clara.
-- Si una descripción es ambigua, conservar `Por categorizar` hasta resolverla.
-- Después de modificar reglas, revisar las transacciones afectadas.
-- Si el Sheet contradice una referencia estática de GitHub, prevalece el Sheet.
-
-## Referencias
-
-Consultar cuando sea necesario:
-
-- `references/catalogos-y-validaciones.md`
-- `references/reglas-conocidas.md`
+Una buena categorización debe hacer que las siguientes capas del modelo —Transacciones, CxC, CxP, Real S&A, Operative incomes, Bancos, Runway y Dashboard— funcionen sin correcciones manuales innecesarias.
