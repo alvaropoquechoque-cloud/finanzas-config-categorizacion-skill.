@@ -821,7 +821,3 @@ Esta skill debe concentrarse en:
 No debe convertirse en una skill general de finanzas.
 
 Su objetivo es que **todos los demás componentes del workflow utilicen un lenguaje financiero común, estable y auditable**.
-
-Configurar primero, registrar después.
-
-Una buena categorización debe hacer que las siguientes capas del modelo —Transacciones, CxC, CxP, Real S&A, Operative incomes, Bancos, Runway y Dashboard— funcionen sin correcciones manuales innecesarias.
